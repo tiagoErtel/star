@@ -31,6 +31,11 @@ public class BebidaController {
 		return bebidaRepository.findAll();
 	}
 	
+	@GetMapping("count")
+	int count(){
+		return bebidaRepository.count();
+	}
+	
 	@GetMapping("{id}")
 	Bebida findById(@PathVariable int id) {
 		Optional<Bebida> bebida = bebidaRepository.findById(id);

@@ -15,42 +15,46 @@ public class Bebida {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long Id;
+	private Long id;
+	
 	@NotEmpty
-	private String Name;
+	private String name;
+	
 	@Enumerated(EnumType.STRING)
-	private BebidaType Type;
+	private BebidaType type;
 	
     public Bebida() {
     }
 	
 	public Bebida(String name, BebidaType type) {
-		this.Name = name;
-		this.Type = type;
+		this.name = name;
+		this.type = type;
 	}
 
 	public Long getId() {
-		return Id;
+		return id;
 	}
-	
+
 	public void setId(Long id) {
-		Id = id;
+		this.id = id;
 	}
-	
+
 	public String getName() {
-		return Name;
+		return name;
 	}
-	
+
 	public void setName(String name) {
-		Name = name;
+		this.name = name;
 	}
-	
+
 	public BebidaType getType() {
-		return Type;
+		return type;
 	}
-	
+
 	public void setType(BebidaType type) {
-		Type = type;
+		this.type = type;
 	}
+
+
 
 }

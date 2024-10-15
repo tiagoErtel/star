@@ -31,13 +31,8 @@ public class BebidaController {
 		return bebidaRepository.findAll();
 	}
 	
-	@GetMapping("count")
-	int count(){
-		return bebidaRepository.count();
-	}
-	
 	@GetMapping("{id}")
-	Bebida findById(@PathVariable int id) {
+	Bebida findById(@PathVariable Long id) {
 		Optional<Bebida> bebida = bebidaRepository.findById(id);
 		
 		if (bebida.isEmpty()) {
@@ -49,19 +44,29 @@ public class BebidaController {
 	
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping("")
-	void create(@Valid @RequestBody Bebida bebida) {
-		bebidaRepository.create(bebida);
+	void create(@RequestBody Bebida bebida) {
+		bebidaRepository.save(bebida);
 	}
 	
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@PutMapping("{id}")
-	void update(@Valid @RequestBody Bebida bebida, @PathVariable int id) {
-		bebidaRepository.update(bebida, id);
+	void update(@Valid @RequestBody Bebida bebida, @PathVariable Long id) {
+        Optional<Bebida> existingBebida = bebidaRepository.findById(id);
+
+        if (existingBebida.isPresent()) {
+        	Bebida newBebida = existingBebida.get();
+        	newBebida.setName(bebida.getName());
+        	newBebida.setType(bebida.getType());
+
+            bebidaRepository.save(newBebida);
+        } else {
+            throw new BebidaNotFoundException();
+        }
 	}
 	
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@DeleteMapping("{id}")
-	void delete(@PathVariable int id) {
-		bebidaRepository.delete(id);
+	void delete(@PathVariable Long id) {
+		bebidaRepository.deleteById(id);
 	}
 }

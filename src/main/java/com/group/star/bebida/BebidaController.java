@@ -42,6 +42,11 @@ public class BebidaController {
 		return bebida.get();
 	}
 	
+	@GetMapping("type/{type}")
+	List<Bebida> findAllByType(@PathVariable BebidaType type){
+		return bebidaRepository.findAllByType(type);
+	}
+	
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping("")
 	void create(@RequestBody Bebida bebida) {

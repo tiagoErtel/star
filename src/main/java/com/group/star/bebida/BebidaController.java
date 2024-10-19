@@ -1,77 +1,73 @@
 package com.group.star.bebida;
 
 import java.util.List;
-import java.util.Optional;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 
-import jakarta.validation.Valid;
-
-@RestController
-@RequestMapping("api/bebidas")
+@Controller
+@RequestMapping("/bebidas")
 public class BebidaController {
-	
-	private final BebidaRepository bebidaRepository;	
-	
-	public BebidaController(BebidaRepository bebidaRepository) {
-		this.bebidaRepository = bebidaRepository;
-	}
-	
-	@GetMapping("")
-	List<Bebida> findAll(){
-		return bebidaRepository.findAll();
-	}
-	
-	@GetMapping("{id}")
-	Bebida findById(@PathVariable Long id) {
-		Optional<Bebida> bebida = bebidaRepository.findById(id);
-		
-		if (bebida.isEmpty()) {
-			throw new BebidaNotFoundException();
-		}
-		
-		return bebida.get();
-	}
-	
-	@GetMapping("type/{type}")
-	List<Bebida> findAllByType(@PathVariable BebidaType type){
-		return bebidaRepository.findAllByType(type);
-	}
-	
-	@ResponseStatus(HttpStatus.CREATED)
-	@PostMapping("")
-	void create(@RequestBody Bebida bebida) {
-		bebidaRepository.save(bebida);
-	}
-	
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	@PutMapping("{id}")
-	void update(@Valid @RequestBody Bebida bebida, @PathVariable Long id) {
-        Optional<Bebida> existingBebida = bebidaRepository.findById(id);
 
-        if (existingBebida.isPresent()) {
-        	Bebida newBebida = existingBebida.get();
-        	newBebida.setName(bebida.getName());
-        	newBebida.setType(bebida.getType());
+    private final BebidaRepository bebidaRepository;
 
-            bebidaRepository.save(newBebida);
+    public BebidaController(BebidaRepository bebidaRepository) {
+        this.bebidaRepository = bebidaRepository;
+    }
+
+    @GetMapping("")
+    public String findAll(@RequestParam(value = "sort", required = false, defaultValue = "id") String sort, Model model) {
+        List<Bebida> bebidas;
+
+        // Apply sorting based on the provided sort parameter
+        if ("name".equals(sort)) {
+            bebidas = bebidaRepository.findAll(Sort.by(Sort.Direction.ASC, "name"));
+        } else if ("type".equals(sort)) {
+            bebidas = bebidaRepository.findAll(Sort.by(Sort.Direction.ASC, "type"));
         } else {
-            throw new BebidaNotFoundException();
+            bebidas = bebidaRepository.findAll(Sort.by(Sort.Direction.ASC, "id")); // Default to sorting by ID
         }
-	}
-	
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	@DeleteMapping("{id}")
-	void delete(@PathVariable Long id) {
-		bebidaRepository.deleteById(id);
-	}
+
+        model.addAttribute("bebidas", bebidas);
+        model.addAttribute("sort", sort); // Pass the current sort option to the view
+        return "list-bebidas";
+    }
+
+    @GetMapping("/new")
+    public String createBebidaForm(Model model) {
+        model.addAttribute("bebida", new Bebida());
+        model.addAttribute("types", BebidaType.values()); // Add this line for types
+        return "edit-bebidas"; // returns the edit-bebidas.html template
+    }
+
+    @PostMapping
+    public String createBebida(@ModelAttribute Bebida bebida) {
+        bebidaRepository.save(bebida);
+        return "redirect:/bebidas"; // redirects to the list page
+    }
+
+    @GetMapping("/edit/{id}")
+    public String editBebida(@PathVariable Long id, Model model) {
+        Bebida bebida = bebidaRepository.findById(id)
+                .orElseThrow(() -> new BebidaNotFoundException());
+        model.addAttribute("bebida", bebida);
+        model.addAttribute("types", BebidaType.values()); // Add this line for types
+        return "edit-bebidas"; // returns the edit-bebidas.html template
+    }
+
+    @PostMapping("/edit/{id}")
+    public String updateBebida(@PathVariable Long id, @ModelAttribute Bebida bebida) {
+        // Ensure the ID is set on the bebida object
+        bebida.setId(id); // Set the ID of the bebida being updated
+        bebidaRepository.save(bebida); // This will update the existing bebida
+        return "redirect:/bebidas"; // redirects to the list page
+    }
+
+    @GetMapping("/delete/{id}")
+    public String deleteBebida(@PathVariable Long id) {
+        bebidaRepository.deleteById(id);
+        return "redirect:/bebidas"; // redirects to the list page
+    }
 }

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Bebidas List</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Bebidas List</h1>
+        <div class="mb-2">
+            <a th:href="@{/bebidas/new}" class="btn btn-primary">Create New Bebida</a>
+        </div>
+
+		<!-- Dropdown for sorting -->
+		<form method="get" class="form-inline mb-3">
+		    <label for="sort" class="mr-2">Sort By:</label>
+		    <select id="sort" name="sort" class="form-control mr-2" onchange="this.form.submit()">
+		        <option value="id" th:selected="${sort == 'id'}">ID</option>
+		        <option value="name" th:selected="${sort == 'name'}">Name</option>
+		        <option value="type" th:selected="${sort == 'type'}">Type</option>
+		    </select>
+		    <noscript><button type="submit" class="btn btn-secondary">Sort</button></noscript>
+		</form>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="bebida : ${bebidas}">
+                    <td th:text="${bebida.id}"></td>
+                    <td th:text="${bebida.name}"></td>
+                    <td th:text="${bebida.type}"></td>
+                    <td>
+                        <a th:href="@{/bebidas/edit/{id}(id=${bebida.id})}" class="btn btn-warning btn-sm">Edit</a>
+                        <a th:href="@{/bebidas/delete/{id}(id=${bebida.id})}" class="btn btn-danger btn-sm" 
+                           th:onclick="'return confirm(\'Are you sure?\')'">Delete</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
